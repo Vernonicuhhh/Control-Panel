@@ -154,11 +154,11 @@ class ControlPanel{
     //SmartDashboard Ouput
     public void printColor(){
         String colorString;
-        if (currentColor == kBlueTarget){ colorString = "Blue";}
-        else if (currentColor == kRedTarget){ colorString = "Red"; }
-        else if (currentColor == kGreenTarget){ colorString = "Green"; }
-        else if (currentColor == kYellowTarget){ colorString = "yellow"; }
-        else{ colorString = "unknown"; }
+        if (currentColor == kBlueTarget){ colorString = "Lagoon Cocktail";}
+        else if (currentColor == kRedTarget){ colorString = "Apple Juice"; }
+        else if (currentColor == kGreenTarget){ colorString = "Brocolli Pie"; }
+        else if (currentColor == kYellowTarget){ colorString = "Pineapple Cake"; }
+        else{ colorString = "Dark Chocolate"; }
 
         if(lastColor == currentColor|| lastColor == null){
             SmartDashboard.putString("discard?", "no");
