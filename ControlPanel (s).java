@@ -14,11 +14,11 @@ import edu.wpi.first.wpilibj.DriverStation;
 
 
 class ControlPanel{
-
     /*Fields*/
     private final portMap map = new portMap();
     private final I2C.Port i2cPort = I2C.Port.kOnboard;
     public final ColorSensorV3 m_ColorSensor = new ColorSensorV3(i2cPort);
+    public CANSparkMax mechanism = new CANSparkMax(map.wheelTurner, MotorType.kBrushless);
 
     public Color goalColor;
     Color currentColor;
@@ -32,11 +32,12 @@ class ControlPanel{
     private final Color kYellowTarget = ColorMatch.makeColor(0.361, 0.524, 0.113);
 
     public ArrayList <Color> sequence = new ArrayList<>();
-    //public CANSparkMax mechanism = new CANSparkMax(map.wheelTurner, MotorType.kBrushless); [for sparkmax]
+
 
     //Variables
     int i = 0, times=4;
     boolean start = true;
+
 
     /*Constructor*/
     public ControlPanel(){}
@@ -62,27 +63,29 @@ class ControlPanel{
         sequence.add(kYellowTarget);
     }
 
+
+    /*Positional Control*/
     //Color Receiver
     public void receiveColor(){
         String gameData;
         gameData = DriverStation.getInstance().getGameSpecificMessage();
         if(gameData.length() > 0){
             switch (gameData.charAt(0)){
-                //add here: if(currentColor == B/G/R/Y), stop spinner
                 case 'B' :
-                    //Blue case code
+                    setGoalColor(kBlueTarget);
                     break;
                 case 'G' :
-                    //Green case code
+                    setGoalColor(kGreenTarget);
                     break;
                 case 'R' :
-                    //Red case code
+                    setGoalColor(kRedTarget);
                     break;
                 case 'Y' :
-                    //Yellow case code
+                    setGoalColor(kYellowTarget);
                     break;
                 default :
                     //This is corrupt data
+                    System.out.println("Corrupt data");
                     break;
             }
         }
@@ -90,6 +93,9 @@ class ControlPanel{
             //Code for no data received yet
         }
     }
+
+    //Color Idetifiers
+    public void setGoalColor(Color color){goalColor = color;}
 
     //Color Recognizer
     public void getCurrentColor(){
@@ -101,24 +107,20 @@ class ControlPanel{
         currentColor = match.color;
     }
 
-    //Color Idetifiers
-    public void setGoalColor(Color color){goalColor = color;}
-
-    //Sequence Indexer
-    public int findCell(Color color){
-        int index = 6;
-        for(int i = 0; i < sequence.size(); i++)
-        {
-            if(color == sequence.get(i))
-            {
-                index = i;
-            }
+    //Color-Sensor Changer
+    public void ledSense(LED colorLight){
+        if(currentColor == kRedTarget){
+            colorLight.set(.61);
         }
-
-        if(index > 3){
-            index %= 4;
+        if(currentColor == kBlueTarget){
+            colorLight.set(.87);
         }
-        return index;
+        if(currentColor == kGreenTarget){
+            colorLight.set(.77);
+        }
+        if(currentColor == kYellowTarget){
+            colorLight.set(.69);
+        }
     }
 
     //Color Checker
@@ -139,65 +141,35 @@ class ControlPanel{
         SmartDashboard.putString("finshed", finished);
     }
 
-
-    //Wheel Turner
-    public void turnWheel(LED colorLight){
-        if(start){
-            getCurrentColor();
-            start = false;
+    //Sequence Indexer
+    public int findCell(Color color){
+        int index = 6;
+        for(int i = 0; i < sequence.size(); i++)
+        {
+            if(color == sequence.get(i))
+            {
+                index = i;
+            }
         }
-        if(i < times*2) {
-            getCurrentColor();
-            // mechanism.set(.1)
+        if(index > 3){
+            index %= 4;
         }
-        if(currentColor == goalColor&& currentColor == sequence.get(findCell(lastColor)+1)){
-            i++;
-            SmartDashboard.putNumber("Times Sensed", (double)i);
-            SmartDashboard.putNumber("Full rotations", (double)i/2);
-        }
-        //else -> mechanism.set(0);
-    }
-
-    //Color-Sensor Changer
-    public void ledSense(LED colorLight){
-        if(currentColor == kRedTarget){
-            colorLight.set(.61);
-        }
-        if(currentColor == kBlueTarget){
-            colorLight.set(.87);
-        }
-        if(currentColor == kGreenTarget){
-            colorLight.set(.77);
-        }
-        if(currentColor == kYellowTarget){
-            colorLight.set(.69);
-        }
+        return index;
     }
 
     //SmartDashboard Ouput
     public void printColor(){
         String colorString;
-        if (currentColor == kBlueTarget){
-          colorString = "Blue";
-        }
-        else if (currentColor == kRedTarget){
-          colorString = "Red";
-        }
-        else if (currentColor == kGreenTarget){
-          colorString = "Green";
-        }
-        else if (currentColor == kYellowTarget){
-          colorString = "yellow";
-        }
-        else{
-          colorString = "unkown";
-        }
+        if (currentColor == kBlueTarget){ colorString = "Blue";}
+        else if (currentColor == kRedTarget){ colorString = "Red"; }
+        else if (currentColor == kGreenTarget){ colorString = "Green"; }
+        else if (currentColor == kYellowTarget){ colorString = "yellow"; }
+        else{ colorString = "unkown"; }
 
         if(lastColor == currentColor|| lastColor == null){
             SmartDashboard.putString("discard?", "no");
             SmartDashboard.putString("Color sensed", colorString);
         }
-
         if(lastColor != currentColor){
             int lastC = findCell(lastColor);
             if(currentColor!=sequence.get(lastC+1)){
@@ -206,6 +178,43 @@ class ControlPanel{
         else{
           SmartDashboard.putString("discard?", "no");
           SmartDashboard.putString("Color Sensed", colorString);
+        }
+    }
+
+
+    /*Rotational Control*/
+    //Wheel Turner
+    public void turnWheel(LED colorLight){
+        if(start){
+            getCurrentColor();
+            start = false;
+        }
+        if(i < times*2) {
+            getCurrentColor();
+            //mechanism.set(.1)
+        }
+        if(currentColor == goalColor && currentColor == sequence.get(findCell(lastColor)+1)){
+            i++;
+            SmartDashboard.putNumber("Times Sensed", (double)i);
+            SmartDashboard.putNumber("Full rotations", (double)i/2);
+        }
+        //else -> mechanism.set(0);
+    }
+
+    //Wheel Stopper
+    public void stopWheel(){
+        mechanism.set(0);
+    }
+
+    //Manual Operation
+    public void manualControl(){
+        if(){//controller input
+            mechanism.set(0.1);
+            System.out.println("spin");
+        }
+        else if(){//controller input
+            mechanism.set(0);
+            System.out.println("stop");
         }
     }
 }
