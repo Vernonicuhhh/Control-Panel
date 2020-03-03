@@ -1,16 +1,16 @@
 package frc.robot;
 
-import java.util.ArrayList;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.ColorMatch;
 import com.revrobotics.ColorMatchResult;
 import com.revrobotics.ColorSensorV3;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.I2C;
-import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj.DriverStation;
+
+import java.util.ArrayList;
 
 
 class ControlPanel{
@@ -22,7 +22,6 @@ class ControlPanel{
 
     public Color goalColor;
     Color currentColor;
-    Color colorSensed;
     Color lastColor;
 
     ColorMatch m_colorMatcher = new ColorMatch();
@@ -33,18 +32,15 @@ class ControlPanel{
 
     public ArrayList <Color> sequence = new ArrayList<>();
 
-
     //Variables
     int i = 0, times=4;
     boolean start = true;
 
-
     /*Constructor*/
-    public ControlPanel(){}
-
+    public ControlPanel(){
+    }
 
     /*Methods*/
-
     //Initialization
     public void init(){
         //asigning colors
@@ -62,7 +58,6 @@ class ControlPanel{
         sequence.add(kRedTarget);
         sequence.add(kYellowTarget);
     }
-
 
     /*Positional Control*/
     //Color Receiver
@@ -146,8 +141,7 @@ class ControlPanel{
         int index = 6;
         for(int i = 0; i < sequence.size(); i++)
         {
-            if(color == sequence.get(i))
-            {
+            if(color == sequence.get(i)){
                 index = i;
             }
         }
@@ -164,7 +158,7 @@ class ControlPanel{
         else if (currentColor == kRedTarget){ colorString = "Red"; }
         else if (currentColor == kGreenTarget){ colorString = "Green"; }
         else if (currentColor == kYellowTarget){ colorString = "yellow"; }
-        else{ colorString = "unkown"; }
+        else{ colorString = "unknown"; }
 
         if(lastColor == currentColor|| lastColor == null){
             SmartDashboard.putString("discard?", "no");
@@ -172,15 +166,15 @@ class ControlPanel{
         }
         if(lastColor != currentColor){
             int lastC = findCell(lastColor);
-            if(currentColor!=sequence.get(lastC+1)){
+            if(currentColor!=sequence.get(lastC+1)) {
                 SmartDashboard.putString("discard?", "yes");
+            }
         }
         else{
-          SmartDashboard.putString("discard?", "no");
-          SmartDashboard.putString("Color Sensed", colorString);
+            SmartDashboard.putString("discard?", "no");
+            SmartDashboard.putString("Color Sensed", colorString);
         }
     }
-
 
     /*Rotational Control*/
     //Wheel Turner
