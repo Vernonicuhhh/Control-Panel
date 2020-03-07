@@ -16,16 +16,16 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 
 /*method flow:
- *-rotational control
- *rotationControl
- *-positional control
- * receiveColor
- * setGoalColor
- * getCurrentColor
- * findCell
- * ledSense
- * colorControl
- * printColor*/
+*-rotational control
+*rotationControl
+*-positional control
+* receiveColor
+* setGoalColor
+* getCurrentColor
+* findCell
+* ledSense
+* colorControl
+* printColor*/
 
 
 class ControlPanel
@@ -59,31 +59,6 @@ class ControlPanel
     public ControlPanel(){}
 
     /*Methods*/
-
-    //rotational control
-    public void rotationControl()
-    {
-        if(initRun){
-            trackedColor = currentColor;
-            if(lastColor == trackedColor){
-                numRotations = 0;
-            }
-            initRun = false;
-        }
-        else if(numRotations <= totalRotations){
-            //mechanism.set(.1);
-            if(lastColor == trackedColor && colorChanged){
-                numRotations +=.5;
-                SmartDashboard.putNumber("total rotations", numRotations );
-            }
-            else if (numRotations>totalRotations){
-                //mechanism.set(0);
-                SmartDashboard.putString("done", "done");
-            }
-        }
-    }
-
-    //positional control
     public void init(){
         //colors
         Color[] colorArr = {kBlueTarget,kGreenTarget,kRedTarget,kYellowTarget};
@@ -180,7 +155,7 @@ class ControlPanel
         return index;
     }
 
-    //checking state
+    //positional control
     public void colorControl(){
         //mechanism.set(.1);
         String finished; //= "unknown"; (not used)
@@ -231,6 +206,29 @@ class ControlPanel
             SmartDashboard.putString("discard?", "no");
             SmartDashboard.putString("Color Sensed", colorString);
             SmartDashboard.putString("Last Color sensed", colorStringTwo);
+        }
+    }
+
+    //rotational control
+    public void rotationControl()
+    {
+        if(initRun){
+            trackedColor = currentColor;
+            if(lastColor == trackedColor){
+                numRotations = 0;
+            }
+            initRun = false;
+        }
+        else if(numRotations <= totalRotations){
+            //mechanism.set(.1);
+            if(lastColor == trackedColor && colorChanged){
+                numRotations +=.5;
+                SmartDashboard.putNumber("total rotations", numRotations );
+            }
+            else if (numRotations>totalRotations){
+                //mechanism.set(0);
+                SmartDashboard.putString("done", "done");
+            }
         }
     }
 }
